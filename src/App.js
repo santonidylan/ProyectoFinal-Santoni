@@ -1,6 +1,8 @@
 import React from 'react';
-// Fíjate que aquí dice './components/...' en minúsculas
-import NavBar from './components/NavBar'; 
+/* IMPORTANTE: 
+  Como estamos en 'src/', usamos './components/...' para entrar a la carpeta.
+*/
+import NavBar from './components/NavBar';
 import ItemListContainer from './components/ItemListContainer';
 
 function App() {
