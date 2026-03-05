@@ -1,25 +1,45 @@
-import React from 'react';
-import ItemCount from './ItemCount';
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useCart } from '../context/CartContext'
+import ItemCount from './ItemCount'
 
-const ItemDetail = ({id, name, img, category, description, price, stock}) => {
-    return (
-        <article className="card mt-5 p-4 shadow" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <header className="card-header text-center">
-                <h2>{name}</h2>
-            </header>
-            <picture className="text-center mt-3">
-                <img src={img} alt={name} className="img-fluid" style={{ maxHeight: '300px' }}/>
-            </picture>
-            <div className="card-body text-center">
-                <p className="card-text text-muted">Categoría: {category}</p>
-                <p className="card-text">{description}</p>
-                <h3 className="card-text text-primary">Precio: ${price}</h3>
+const ItemDetail = ({ id, name, img, category, description, price, stock }) => {
+  const { addItem, isInCart } = useCart()
+  const [added, setAdded] = useState(false)
+
+  const handleAdd = (quantity) => {
+    addItem({ id, name, img, price, stock }, quantity)
+    setAdded(true)
+  }
+
+  return (
+    <div className="item-detail container">
+      <div className="item-detail__img-wrap">
+        <img src={img} alt={name} className="item-detail__img" />
+      </div>
+      <div className="item-detail__info">
+        <span className="item-card__category">{category}</span>
+        <h1 className="item-detail__name">{name}</h1>
+        <p className="item-detail__description">{description}</p>
+        <p className="item-detail__price">${price.toLocaleString()}</p>
+        {stock === 0
+          ? <div className="badge badge-danger">Sin stock disponible</div>
+          : <p className="item-detail__stock">{stock} unidades disponibles</p>
+        }
+        <div className="item-detail__actions">
+          {!added && !isInCart(id) ? (
+            <ItemCount stock={stock} initial={1} onAdd={handleAdd} />
+          ) : (
+            <div className="added-feedback">
+              <p className="added-feedback__msg">✅ ¡Producto agregado al carrito!</p>
+              <Link to="/cart" className="btn btn-primary" style={{ width: 'auto' }}>Ver carrito →</Link>
+              <Link to="/" className="btn btn-outline">Seguir comprando</Link>
             </div>
-            <footer className="card-footer text-center">
-                <ItemCount initial={1} stock={stock} onAdd={(quantity) => console.log('Cantidad agregada ', quantity)}/>
-            </footer>
-        </article>
-    )
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
-export default ItemDetail;
+export default ItemDetail

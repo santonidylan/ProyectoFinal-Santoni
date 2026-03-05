@@ -1,38 +1,34 @@
-import React, { useState, useEffect } from 'react';
-import { getProductById } from '../asyncMock';
-import ItemDetail from './ItemDetail';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { getProductById } from '../services/products'
+import ItemDetail from './ItemDetail'
 
 const ItemDetailContainer = () => {
-    const [product, setProduct] = useState(null)
-    const [loading, setLoading] = useState(true)
+  const [product, setProduct] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const { itemId } = useParams()
 
-    // useParams captura el id de la url (ej: /item/1 -> itemId: 1)
-    const { itemId } = useParams()
+  useEffect(() => {
+    setLoading(true)
+    getProductById(itemId)
+      .then(data => setProduct(data))
+      .catch(err => console.error(err))
+      .finally(() => setLoading(false))
+  }, [itemId])
 
-    useEffect(() => {
-        setLoading(true)
-        getProductById(itemId)
-            .then(response => {
-                setProduct(response)
-            })
-            .catch(error => {
-                console.error(error)
-            })
-            .finally(() => {
-                setLoading(false)
-            })
-    }, [itemId])
+  if (loading) return (
+    <div className="container">
+      <div className="loader-wrap"><div className="loader" /><p>Cargando producto...</p></div>
+    </div>
+  )
 
-    if(loading) {
-        return <div className="text-center mt-5"><h3>Cargando detalle...</h3></div>
-    }
+  if (!product) return (
+    <div className="container">
+      <div className="empty-state"><span>🔍</span><p>El producto no existe.</p></div>
+    </div>
+  )
 
-    return(
-        <div className="ItemDetailContainer">
-            { product ? <ItemDetail {...product} /> : <h3>El producto no existe</h3> }
-        </div>
-    )
+  return <ItemDetail {...product} />
 }
 
-export default ItemDetailContainer;
+export default ItemDetailContainer

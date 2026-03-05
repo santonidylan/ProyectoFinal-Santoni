@@ -1,39 +1,46 @@
-import React, { useState, useEffect } from 'react';
-import { getProducts, getProductsByCategory } from '../asyncMock';
-import ItemList from './ItemList';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { getProducts } from '../services/products'
+import ItemList from './ItemList'
 
-const ItemListContainer = ({ greeting }) => {
-    const [products, setProducts] = useState([])
-    const [loading, setLoading] = useState(true)
+const ItemListContainer = () => {
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const { categoryId } = useParams()
 
-    // useParams captura la categoría de la url (ej: /category/celular)
-    const { categoryId } = useParams()
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    getProducts(categoryId)
+      .then(data => setProducts(data))
+      .catch(err => { console.error(err); setError('No se pudieron cargar los productos.') })
+      .finally(() => setLoading(false))
+  }, [categoryId])
 
-    useEffect(() => {
-        setLoading(true)
+  if (loading) return (
+    <div className="container">
+      <div className="loader-wrap"><div className="loader" /><p>Cargando productos...</p></div>
+    </div>
+  )
 
-        // Si existe categoryId, filtramos. Si no, traemos todos.
-        const asyncFunc = categoryId ? getProductsByCategory : getProducts
+  if (error) return (
+    <div className="container">
+      <div className="empty-state"><span>⚠️</span><p>{error}</p></div>
+    </div>
+  )
 
-        asyncFunc(categoryId)
-            .then(response => {
-                setProducts(response)
-            })
-            .catch(error => {
-                console.error(error)
-            })
-            .finally(() => {
-                setLoading(false)
-            })
-    }, [categoryId]) // [cite: 44] Dependencia importante para recargar al cambiar categoría
-
-    return (
-        <div className="container mt-4">
-            <h2 className="text-center mb-4">{greeting} {categoryId && <span>: {categoryId}</span>}</h2>
-            { loading ? <h3 className="text-center">Cargando productos...</h3> : <ItemList products={products}/> }
-        </div>
-    )
+  return (
+    <div className="container">
+      <div className="page-header">
+        <h1 className="page-header__title">
+          {categoryId ? <><span>{categoryId}</span></> : <>Todos los <span>productos</span></>}
+        </h1>
+        <p className="page-header__sub">{products.length} productos encontrados</p>
+      </div>
+      <ItemList products={products} />
+    </div>
+  )
 }
 
-export default ItemListContainer;
+export default ItemListContainer

@@ -1,12 +1,17 @@
-import React from 'react';
-import Item from './Item';
+import Item from './Item'
 
-const ItemList = ({products}) => {
-    return(
-        <div className="d-flex flex-wrap justify-content-center">
-            {products.map(prod => <Item key={prod.id} {...prod} />)}
-        </div>
-    )
+const ItemList = ({ products }) => {
+  if (products.length === 0) return (
+    <div className="empty-state">
+      <span>📦</span>
+      <p>No hay productos en esta categoría.</p>
+    </div>
+  )
+  return (
+    <div className="product-grid">
+      {products.map(product => <Item key={product.id} {...product} />)}
+    </div>
+  )
 }
 
-export default ItemList;
+export default ItemList
